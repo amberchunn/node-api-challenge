@@ -1,54 +1,55 @@
 // Dependencies
 const express = require('express');
 const helpers = require('../data/helpers/actionModel');
-const projects = require('./projectRoutes');
+const projectActions = require('../data/helpers/projectModel');
 
 const router = express.Router();
 
 
 // GET All Actions
-router.get('/', (req, res) => {
+router.get('/actions', (req, res) => {
   helpers.get(req.data)
       .then((data) => {
         res.status(200).json(data)
       })
       .catch((err) => {
-        res.status(500).json({message: `Error: ${err} when receiving action`})
+        res.status(500).json({message: `Error: ${err} when receiving the actions`})
       })
 });
 
 // GET Single Action
-router.get('/:id', (req, res) => {
+router.get('/actions/:id', (req, res) => {
   if (req.params.id) {
     helpers.get(req.params.id)
       .then((data) => {
         res.status(200).json(data);
       })
       .catch((err) => {
-        res.status(500).json({message: 'There was a problem with the server'})
+        res.status(500).json({message: `Error: ${err} when receiving the action`})
       })
   }  else {
       return res.status(404).json({message: 'No action found'})
     }
 })
 
-// GET Single Action
-router.get('/:id', (req, res) => {
-  if (req.params.id) {
-    helpers.get(req.params.id)
+// GET All Actions for Specific Project
+router.get('/:project_id/actions/', (req, res) => {
+  const project = req.params.project_id;
+  if (project != null) {
+    projectActions.getProjectActions(req.params.project_id)
       .then((data) => {
         res.status(200).json(data);
       })
       .catch((err) => {
-        res.status(500).json({message: 'There was a problem with the server'})
+        res.status(500).json({message: `Error: ${err} when receiving the actions`})
       })
   }  else {
-      return res.status(404).json({message: 'No action found'})
+      return res.status(404).json({message: 'No project found'})
     }
 })
 
 // INSERT New Action
-router.post("/", (req, res) => {
+router.post("/actions", (req, res) => {
   if (!req.body.project_id || !req.body.description || !req.body.notes) {
     return res.status(400).json({message: 'Error: Please be sure to add a title, description, and note'})
   }
@@ -62,7 +63,7 @@ router.post("/", (req, res) => {
 })
 
 // PATCH Action
-router.patch("/:id", (req, res) => {
+router.patch("/actions/:id", (req, res) => {
   if (!req.params.id) {
     console.log("No action with that id.")
     return null;
@@ -81,7 +82,8 @@ router.patch("/:id", (req, res) => {
 })
 
 // DELETE Action
-router.delete("/:id", (req, res) => {
+router.delete("/actions/:id", (req, res) => {
+
   helpers.remove(req.params.id)
     .then((count) => {
       res.status(200).json(count)
